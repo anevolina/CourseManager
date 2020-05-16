@@ -1,0 +1,6 @@
+NEXT_STEP = 'next'
+WELCOME_NEW = 'welcome_new'
+WELCOME_OLD = 'welcome_old'
+RESET_CONFIRMATION = 'reset_confirm'
+RESET_DONE = 'reset_complete'
+RESET_CANCELED = 'reset_cancel'
