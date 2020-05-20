@@ -1,3 +1,4 @@
+import exceptions
 import settings
 
 
@@ -35,14 +36,6 @@ def get_course_language(course_id):
 
 
 def set_new_value_to_field(collection: str, param: dict, field: str, value):
-    """
-
-    :param collection:
-    :param id:
-    :param field:
-    :param value:
-    :return:
-    """
 
     collection = settings.get_collection(collection)
     collection.update_one(param, {'$set': {field: value}})
@@ -51,10 +44,7 @@ def set_new_value_to_field(collection: str, param: dict, field: str, value):
 
 
 def reset_user_progress(user_id, course_id):
-
-    course_field = settings.UsersCoursesField + '.' + settings.UsersCourseIdField
-    step_field = settings.UsersCoursesField + '.$.' + settings.UsersCourseStepField
-    param = {settings.IdField: user_id, course_field: course_id}
+    param, step_field = get_param_and_step_field(user_id, course_id)
     set_new_value_to_field(settings.UsersCollection, param, step_field, 0)
 
 
@@ -89,3 +79,57 @@ def update_array_field(collection: str, _id, field: str, value: list):
     collection.update_one({settings.IdField: _id}, {'$addToSet': {field: {'$each': value}}}, True)
 
     pass
+
+
+def get_next_course_step(user_id, course_id):
+    step = get_next_step(user_id, course_id)
+    collection = settings.get_collection(settings.CoursesCollection)
+    res = collection.find_one(
+        {settings.IdField: course_id},
+        {settings.IdField: 0, settings.CourseContentField: 1}
+    )
+
+    return res[settings.CourseContentField][step]
+
+
+def increase_course_step(user_id, course_id):
+    course_position, step_field = get_param_and_step_field(user_id, course_id)
+    increment_field(settings.UsersCollection, course_position, step_field, 1)
+    pass
+
+
+def increment_field(collection, param, field, value):
+    """
+    Increment exact field by value
+    """
+
+    collection = settings.get_collection(collection)
+    collection.update_one(param, {'$inc': {field: value}}, upsert=True)
+
+    return
+
+
+def get_param_and_step_field(user_id, course_id):
+    course_field = settings.UsersCoursesField + '.' + settings.UsersCourseIdField
+    step_field = settings.UsersCoursesField + '.$.' + settings.UsersCourseStepField
+    param = {settings.IdField: user_id, course_field: course_id}
+
+    return param, step_field
+
+
+def get_next_step(user_id, course_id):
+
+    collection = settings.get_collection(settings.UsersCollection)
+    res = collection.find_one(
+        {settings.IdField: user_id},
+        {
+            settings.IdField: 0,
+            settings.UsersCoursesField: {'$elemMatch': {settings.UsersCourseIdField: course_id}}
+        }
+    )
+
+    if res:
+        return res[settings.UsersCoursesField][0][settings.UsersCourseStepField]
+
+    else:
+        raise exceptions.CourseNotFoundException(f"user: {user_id} doesn't have this course '{course_id}'")
