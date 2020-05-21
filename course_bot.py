@@ -58,12 +58,12 @@ class CourseBot:
 
             else:
                 self.add_course(user_id)
-                msg = self.get_message(msg_id=msg_codes.WELCOME_OLD) + self.about
+                msg = self.get_message(msg_id=msg_codes.WELCOME_OLD)+ '\n\n' + self.about
                 control_buttons = self.get_inline_buttons(step=button_steps.START_COURSE)
 
         else:
             self.add_user(user_id)
-            msg = self.get_message(msg_id=msg_codes.WELCOME_NEW) + self.about
+            msg = self.get_message(msg_id=msg_codes.WELCOME_NEW) + '\n\n' + self.about
             control_buttons = self.get_inline_buttons(step=button_steps.START_COURSE)
 
         self.send_message(bot, user_id, msg, control_buttons)
@@ -105,7 +105,7 @@ class CourseBot:
         user_id = self.get_user_id(update=update)
         db_module.reset_user_progress(user_id, self._id)
 
-        msg = self.get_message(msg_id=msg_codes.RESET_DONE) + '/n/n' + self.about
+        msg = self.about
         buttons = self.get_inline_buttons(step=button_steps.START_COURSE)
         self.send_message(bot, user_id, msg, buttons )
 
