@@ -6,6 +6,7 @@ import db_module
 import msg_codes
 import settings
 
+
 class CourseBot:
     def __init__(self, _id: str):
         self._id = _id
@@ -57,15 +58,15 @@ class CourseBot:
 
             else:
                 self.add_course(user_id)
-                msg = self.get_message(msg_id=msg_codes.WELCOME_OLD)
+                msg = self.get_message(msg_id=msg_codes.WELCOME_OLD) + self.about
                 control_buttons = self.get_inline_buttons(step=button_steps.START_COURSE)
 
         else:
             self.add_user(user_id)
-            msg = self.get_message(msg_id=msg_codes.WELCOME_NEW)
+            msg = self.get_message(msg_id=msg_codes.WELCOME_NEW) + self.about
             control_buttons = self.get_inline_buttons(step=button_steps.START_COURSE)
 
-        self.send_message(bot, user_id, msg + self.about, control_buttons)
+        self.send_message(bot, user_id, msg, control_buttons)
         return
 
     def handle_user_message(self, bot, update):
@@ -104,20 +105,25 @@ class CourseBot:
         user_id = self.get_user_id(update=update)
         db_module.reset_user_progress(user_id, self._id)
 
-        msg = self.get_message(msg_id=msg_codes.RESET_DONE)
+        msg = self.get_message(msg_id=msg_codes.RESET_DONE) + '/n/n' + self.about
         buttons = self.get_inline_buttons(step=button_steps.START_COURSE)
-        self.send_message(bot, user_id, msg + self.about, buttons)
+        self.send_message(bot, user_id, msg, buttons )
 
     def cancel_reset(self, bot, update):
         user_id = self.get_user_id(update=update)
         msg = self.get_message(msg_id=msg_codes.RESET_CANCELED)
-        buttons = self.get_inline_buttons(step=button_steps.NEXT)
-        self.send_message(bot, user_id, msg, buttons=buttons)
+        self.send_message(bot, user_id, msg)
 
-    def next_step(self, bot, update):
+    def next_step(self, bot, update, step):
+
+        step = int(step)
         user_id = self.get_user_id(update)
-        msg = self.get_next_course_step(user_id)
-        buttons = self.get_inline_buttons(step=button_steps.NEXT)
+        msg, is_it_last = self.get_next_course_step(step)
+
+        if is_it_last:
+            buttons = self.get_inline_buttons(step=button_steps.FINISH_COURSE)
+        else:
+            buttons = self.get_inline_buttons(step=button_steps.NEXT, step_number=step+1)
 
         self.send_message(bot, user_id, msg, buttons=buttons)
 
@@ -131,17 +137,18 @@ class CourseBot:
         elif query.data == msg_codes.RESET_CANCEL_BUTTON:
             self.cancel_reset(bot, update)
 
-        elif query.data == msg_codes.NEXT_STEP:
-            self.next_step(bot, update)
+        elif query.data.startswith(msg_codes.NEXT_STEP):
+            step = query.data.replace(msg_codes.NEXT_STEP, '')
+            self.next_step(bot, update, step)
 
         elif query.data == msg_codes.FINISH_COURSE:
             print("DO SOMETHING")
 
     @property
     def about(self):
-        return "a few words about this course"
+        return db_module.get_about(self._id)
 
-    def get_inline_buttons(self, step):
+    def get_inline_buttons(self, step, step_number=None):
 
         control_buttons = []
 
@@ -153,11 +160,11 @@ class CourseBot:
 
         elif step == button_steps.START_COURSE:
             text = self.get_message(msg_id=msg_codes.START_COURSE_BUTTON)
-            control_buttons = [InlineKeyboardButton(text, callback_data=msg_codes.NEXT_STEP)]
+            control_buttons = [InlineKeyboardButton(text, callback_data=msg_codes.NEXT_STEP + '0')]
 
         elif step == button_steps.NEXT:
             text = self.get_message(msg_id=msg_codes.NEXT_STEP)
-            control_buttons = [InlineKeyboardButton(text, callback_data=msg_codes.NEXT_STEP)]
+            control_buttons = [InlineKeyboardButton(text, callback_data=(msg_codes.NEXT_STEP + str(step_number)))]
 
         elif step == button_steps.FINISH_COURSE:
             text = self.get_message(msg_id=msg_codes.FINISH_COURSE)
@@ -168,8 +175,7 @@ class CourseBot:
     def send_message(self, bot, user_id, msg, buttons=None):
         bot.send_message(chat_id=user_id, text=msg, reply_markup=buttons)
 
-    def get_next_course_step(self, user_id):
-        next_step = db_module.get_next_course_step(user_id, self._id)
-        db_module.increase_course_step(user_id, self._id)
+    def get_next_course_step(self, step):
+        next_step, is_it_last_step = db_module.get_next_course_step(self._id, step)
 
-        return next_step[settings.CourseContentTextField]
+        return next_step[settings.CourseContentTextField], is_it_last_step

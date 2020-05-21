@@ -55,6 +55,10 @@ def get_entry(collection, _id):
 
     return collection.find_one(param)
 
+def find_one(collection, search: dict, param: dict):
+    collection = settings.get_collection(collection)
+    return collection.find_one(search, param)
+
 
 def add_user(user_id, course_id):
     users_collection = settings.get_collection(settings.UsersCollection)
@@ -81,15 +85,15 @@ def update_array_field(collection: str, _id, field: str, value: list):
     pass
 
 
-def get_next_course_step(user_id, course_id):
-    step = get_next_step(user_id, course_id)
-    collection = settings.get_collection(settings.CoursesCollection)
-    res = collection.find_one(
-        {settings.IdField: course_id},
-        {settings.IdField: 0, settings.CourseContentField: 1}
-    )
+def get_next_course_step(course_id, step):
+    search = {settings.IdField: course_id}
+    param = {settings.IdField: 0, settings.CourseContentField: 1}
+    res = find_one(settings.CoursesCollection, search, param)
 
-    return res[settings.CourseContentField][step]
+    length = len(res[settings.CourseContentField])
+    last_step = (length - 1 <= step)
+
+    return res[settings.CourseContentField][step], last_step
 
 
 def increase_course_step(user_id, course_id):
@@ -117,19 +121,25 @@ def get_param_and_step_field(user_id, course_id):
     return param, step_field
 
 
-def get_next_step(user_id, course_id):
+# def get_next_step(user_id, course_id):
+#
+#     collection = settings.get_collection(settings.UsersCollection)
+#     res = collection.find_one(
+#         {settings.IdField: user_id},
+#         {
+#             settings.IdField: 0,
+#             settings.UsersCoursesField: {'$elemMatch': {settings.UsersCourseIdField: course_id}}
+#         }
+#     )
+#
+#     if res:
+#         return res[settings.UsersCoursesField][0][settings.UsersCourseStepField]
+#
+#     else:
+#         raise exceptions.CourseNotFoundException(f"user: {user_id} doesn't have this course '{course_id}'")
+#
 
-    collection = settings.get_collection(settings.UsersCollection)
-    res = collection.find_one(
-        {settings.IdField: user_id},
-        {
-            settings.IdField: 0,
-            settings.UsersCoursesField: {'$elemMatch': {settings.UsersCourseIdField: course_id}}
-        }
-    )
-
-    if res:
-        return res[settings.UsersCoursesField][0][settings.UsersCourseStepField]
-
-    else:
-        raise exceptions.CourseNotFoundException(f"user: {user_id} doesn't have this course '{course_id}'")
+def get_about(course_id):
+    search = {settings.IdField: course_id}
+    param = {settings.IdField: 0, settings.CourseAboutField: 1}
+    return find_one(settings.CoursesCollection, search, param)[settings.CourseAboutField]
