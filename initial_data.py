@@ -1,8 +1,12 @@
 import settings
 import json
 
-with open('translation_data.json', encoding='utf-8') as file:
-    all_translations = json.load(file)
+files = ['Courses', 'Translation']
 
-translate_collection = settings.get_collection('Translation')
-translate_collection.insert_many(all_translations)
+for file in files:
+    file_name = file+'.json'
+    with open(file_name, encoding='utf-8') as f:
+        all_entries = json.load(f)
+
+    collection = settings.get_collection(file)
+    collection.insert_many(all_entries)
