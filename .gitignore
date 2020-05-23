@@ -4,3 +4,5 @@ data
 venv
 test.py
 settings.py
+.env
+*.json

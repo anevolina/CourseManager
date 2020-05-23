@@ -2,16 +2,6 @@ import exceptions
 import settings
 
 
-def get_token(course_id: str):
-    param = {settings.IdField: {'$eq': course_id}}
-
-    entry = get_all_entries(settings.CoursesCollection, param, {settings.CourseTokenField: 1})
-
-    assert entry, f"Course with id: {course_id} not found!"
-
-    return entry[0][settings.CourseTokenField]
-
-
 def get_bots_ids():
     return [b[settings.IdField] for b in get_all_entries(settings.CoursesCollection, {}, {settings.IdField: 1})]
 
