@@ -8,4 +8,3 @@ for each in all_bots:
     new_bot = StepByStepCourse(each)
     new_bot.start_bot()
     started_bots.append(new_bot)
-

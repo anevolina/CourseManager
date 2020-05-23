@@ -1,3 +1,5 @@
+import os
+
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 
@@ -37,8 +39,7 @@ class CourseBot:
         pass
 
     def get_tlgr_token(self):
-
-        return db_module.get_token(self._id)
+        return os.getenv(f"TELEGRAM_BOT_TOKEN_{self._id}")
 
     def get_user_id(self, update):
 
@@ -47,7 +48,6 @@ class CourseBot:
         return user_id
 
     def start_callback(self, bot, update):
-
         user_id = self.get_user_id(update)
         existed_user = db_module.get_entry(settings.UsersCollection, user_id)
 
