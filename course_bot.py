@@ -69,9 +69,6 @@ class CourseBot:
         self.send_message(bot, user_id, msg, control_buttons)
         return
 
-    def handle_user_message(self, bot, update):
-        print('I was here')
-
     def get_message(self, msg_id):
 
         lang = self.lang
@@ -80,7 +77,7 @@ class CourseBot:
             result = message[lang]
         except KeyError:
             result = message[settings.DefaultLang]
-        return result
+        return self.parse_text(result)
 
     def add_user(self, user_id):
         db_module.add_user(user_id, self._id)
@@ -103,7 +100,6 @@ class CourseBot:
     def reset_course(self, bot, update):
 
         user_id = self.get_user_id(update=update)
-        db_module.reset_user_progress(user_id, self._id)
 
         msg = self.about
         buttons = self.get_inline_buttons(step=button_steps.START_COURSE)
@@ -142,11 +138,11 @@ class CourseBot:
             self.next_step(bot, update, step)
 
         elif query.data == msg_codes.FINISH_COURSE:
-            print("DO SOMETHING")
+            self.after_course_callback(bot, update)
 
     @property
     def about(self):
-        return db_module.get_about(self._id)
+        return self.parse_text(db_module.get_about(self._id))
 
     def get_inline_buttons(self, step, step_number=None):
 
@@ -177,5 +173,20 @@ class CourseBot:
 
     def get_next_course_step(self, step):
         next_step, is_it_last_step = db_module.get_next_course_step(self._id, step)
+        next_step = self.parse_text(next_step[settings.CourseContentTextField])
 
-        return next_step[settings.CourseContentTextField], is_it_last_step
+        return next_step, is_it_last_step
+
+    def parse_text(self, text):
+        return '\n'.join(text.split('\\n'))
+
+    def after_course_callback(self, bot, update):
+        user_id = self.get_user_id(update)
+        step = db_module.get_next_step(user_id, self._id)
+
+        if step >= 5:
+            msg = self.get_message(msg_codes.AFTER_COURSE)
+            self.send_message(bot, user_id, msg)
+            db_module.reset_user_step(user_id, self._id)
+        else:
+            db_module.increase_course_step(user_id, self._id)

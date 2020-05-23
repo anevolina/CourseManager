@@ -8,6 +8,7 @@ RESET_CONFIRM_BUTTON = 'reset_confirm_button'
 RESET_CANCEL_BUTTON = 'reset_cancel_button'
 START_COURSE_BUTTON = 'start_course_button'
 FINISH_COURSE = 'finish_course'
+AFTER_COURSE = 'after_course'
 
 
 

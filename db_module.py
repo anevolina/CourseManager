@@ -43,7 +43,7 @@ def set_new_value_to_field(collection: str, param: dict, field: str, value):
     pass
 
 
-def reset_user_progress(user_id, course_id):
+def reset_user_step(user_id, course_id):
     param, step_field = get_param_and_step_field(user_id, course_id)
     set_new_value_to_field(settings.UsersCollection, param, step_field, 0)
 
@@ -121,23 +121,23 @@ def get_param_and_step_field(user_id, course_id):
     return param, step_field
 
 
-# def get_next_step(user_id, course_id):
-#
-#     collection = settings.get_collection(settings.UsersCollection)
-#     res = collection.find_one(
-#         {settings.IdField: user_id},
-#         {
-#             settings.IdField: 0,
-#             settings.UsersCoursesField: {'$elemMatch': {settings.UsersCourseIdField: course_id}}
-#         }
-#     )
-#
-#     if res:
-#         return res[settings.UsersCoursesField][0][settings.UsersCourseStepField]
-#
-#     else:
-#         raise exceptions.CourseNotFoundException(f"user: {user_id} doesn't have this course '{course_id}'")
-#
+def get_next_step(user_id, course_id):
+
+    collection = settings.get_collection(settings.UsersCollection)
+    res = collection.find_one(
+        {settings.IdField: user_id},
+        {
+            settings.IdField: 0,
+            settings.UsersCoursesField: {'$elemMatch': {settings.UsersCourseIdField: course_id}}
+        }
+    )
+
+    if res:
+        return res[settings.UsersCoursesField][0][settings.UsersCourseStepField]
+
+    else:
+        raise exceptions.CourseNotFoundException(f"user: {user_id} doesn't have this course '{course_id}'")
+
 
 def get_about(course_id):
     search = {settings.IdField: course_id}
