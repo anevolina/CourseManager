@@ -6,3 +6,4 @@ test.py
 settings.py
 .env
 *.json
+!pm2.config.json
