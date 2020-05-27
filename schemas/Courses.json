@@ -1,0 +1,33 @@
+{
+  "$jsonSchema": {
+    "bsonType": "object",
+    "required": [
+      "is_private",
+      "language",
+      "content",
+      "about"
+    ],
+    "properties":{
+      "is_private":{
+        "bsonType": "bool",
+          "description": "is_private is a required field, and should be bool"
+      },
+      "language": {
+        "bsonType": "string",
+        "description": "language is a required field and should be string"
+      },
+      "content":{
+         "bsonType": "array",
+         "description": "content is a required field and should be an array with dicts",
+         "uniqueItems": true,
+         "items": {
+          "bsonType": ["object"]
+         }
+      },
+      "about": {
+        "bsonType": "string",
+        "description": "about is a required field and should be string"
+      }
+    }
+  }
+}
