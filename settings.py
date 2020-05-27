@@ -1,4 +1,7 @@
+from dotenv import load_dotenv
 from pymongo import MongoClient
+
+load_dotenv()
 
 #Default mongo & db settings
 DefaultMongo = 'mongodb://localhost:27017/'
