@@ -26,7 +26,7 @@ def load_file(file_path: str):
     return
 
 
-data_folder = path.dirname(__file__) + '/data/'
+data_folder = path.dirname(__file__) + './data/'
 all_files = [data_folder + f for f in listdir(data_folder) if isfile(join(data_folder, f))]
 
 for file in all_files:
