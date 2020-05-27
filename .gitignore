@@ -3,6 +3,5 @@ __pycache__
 data
 venv
 test.py
-settings.py
 .env
 !pm2.config.json
