@@ -133,3 +133,18 @@ def get_about(course_id):
     search = {settings.IdField: course_id}
     param = {settings.IdField: 0, settings.CourseAboutField: 1}
     return find_one(settings.CoursesCollection, search, param)[settings.CourseAboutField]
+
+
+def insert_entries(colleciton_name, entries):
+
+    colleciton = settings.get_collection(colleciton_name)
+    failed = []
+    for entry in entries:
+        try:
+            colleciton.update({settings.IdField: entry[settings.IdField]}, entry, upsert=True)
+        except Exception as e:
+            failed.append(f'{entry}: {e}')
+
+    if failed:
+        failed = '\n'.join(failed)
+        raise Exception(f"\nCollection {colleciton_name.upper()} failed to update entries:\n{failed}")
