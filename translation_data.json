@@ -1,8 +1,0 @@
-[
-  {"_id": "next", "RU":  "Далее", "EN" : "Next"},
-  {"_id": "welcome_new", "RU":  "Приветствие нового пользователя", "EN" : "Welcome to the new user"},
-  {"_id":  "welcome_old", "RU":  "Приветствие старого пользователя", "EN":  "Welcome old"},
-  {"_id":  "reset_confirm", "RU":  "Уверен что хочешь обновить курс?", "EN":  "Are you sure?"},
-  {"_id":  "reset_complete", "RU":  "Статистика обновлена", "EN":  "Reset"},
-  {"_id":  "reset_cancel", "RU":  "Отмена сброса", "EN":  "Cancel reset"}
-]
